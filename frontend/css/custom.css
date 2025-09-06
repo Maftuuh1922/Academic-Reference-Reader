@@ -1,0 +1,340 @@
+/* Custom CSS for Academic Reference Reader */
+
+/* Base styles */
+body {
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Sidebar styles */
+#sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+#sidebar.open {
+    transform: translateX(0);
+}
+
+.nav-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-btn:hover {
+    background-color: #f1f5f9;
+}
+
+.nav-btn.active {
+    background-color: #e2e8f0;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+/* View content */
+.view-content {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.view-content.hidden {
+    display: none;
+}
+
+/* Category distribution bars */
+.category-bar {
+    height: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.category-bar:hover {
+    height: 10px;
+}
+
+/* Progress bars for categories */
+.progress-bar {
+    background-color: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.5s ease-in-out;
+    border-radius: 4px;
+}
+
+/* Category colors */
+.bg-stem { background-color: #3b82f6; }
+.bg-social { background-color: #10b981; }
+.bg-health { background-color: #ef4444; }
+.bg-business { background-color: #f59e0b; }
+.bg-arts { background-color: #8b5cf6; }
+.bg-education { background-color: #ec4899; }
+.bg-law { background-color: #6366f1; }
+.bg-interdisciplinary { background-color: #f97316; }
+
+/* Responsive sidebar overlay */
+@media (max-width: 1024px) {
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    
+    #sidebar.open {
+        transform: translateX(0);
+    }
+}
+
+/* Loading animation */
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+/* Drag and drop styles */
+.upload-area {
+    border: 2px dashed #cbd5e0;
+    transition: all 0.3s ease;
+}
+
+.upload-area.dragover {
+    border-color: #4299e1;
+    background-color: #ebf8ff;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Focus states */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Button hover effects */
+.btn-hover {
+    transform: translateY(0);
+    transition: transform 0.2s ease-in-out;
+}
+
+.btn-hover:hover {
+    transform: translateY(-2px);
+}
+
+/* Card animations */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal animations */
+.modal {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+/* Reader modal specific layout */
+.reader-modal-container {
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(2px);
+}
+
+.reader-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 1.5rem 0.75rem 1.5rem;
+    background: linear-gradient(90deg,#f8fafc,#ffffff);
+}
+
+.reader-tab-btn {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding: 0.5rem 0.9rem;
+    border-radius: 9999px;
+    background:#f1f5f9;
+    color:#475569;
+    cursor:pointer;
+    border:1px solid transparent;
+}
+.reader-tab-btn:hover {background:#e2e8f0;}
+.reader-tab-btn.active {background:#2563eb;color:#fff;box-shadow:0 2px 6px -1px rgba(37,99,235,0.4);}
+
+.pdf-frame-wrapper {height:100%;display:flex;flex-direction:column;}
+.pdf-embed-container {flex:1;position:relative;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;background:#0f172a;}
+.pdf-embed-container iframe, .pdf-embed-container embed {width:100%;height:100%;border:0;}
+.pdf-fallback {color:#94a3b8;font-size:0.875rem;padding:1rem;text-align:center;}
+
+.metadata-grid strong {color:#0f172a;}
+.prose h4 {color:#0f172a;}
+
+/* Smooth show/hide for sections */
+.fade-section {opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease;}
+.fade-section.show {opacity:1;transform:translateY(0);}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Rating stars */
+.star {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+.star:hover {
+    color: #fbbf24;
+}
+
+.star.active {
+    color: #f59e0b;
+}
+
+/* Type badges */
+.type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.type-jurnal {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.type-tesis {
+    background-color: #e9d5ff;
+    color: #7c3aed;
+}
+
+.type-buku {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.type-laporan {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+    }
+    
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Loading animation */
+.pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+/* Drag and drop styles */
+.drag-over {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+/* Text selection */
+::selection {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .dark-mode {
+        background-color: #1f2937;
+        color: #f9fafb;
+    }
+}

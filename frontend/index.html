@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Reference Reader</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <style>
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area.dragover {
+            border-color: #4299e1;
+            background-color: #ebf8ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Header -->
+        <header class="border-b border-gray-200 bg-white shadow-sm">
+            <div class="flex items-center justify-between p-4">
+                <div class="flex items-center gap-3">
+                    <button id="sidebarToggle" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-book-open text-2xl text-blue-600"></i>
+                        <div>
+                            <h1 class="text-xl font-medium text-gray-900">Academic Reader</h1>
+                            <p class="text-sm text-gray-500">Smart Paper Reading & Organization</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-1 text-sm text-gray-500">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        Smart Reading Mode
+                    </div>
+                    <div class="hidden md:flex items-center gap-1 text-sm text-gray-500">
+                        <i class="fas fa-cloud text-green-500"></i>
+                        Drive Connected
+                    </div>
+                    
+                    <!-- User menu (hidden by default) -->
+                    <div id="userInfo" class="hidden flex items-center space-x-3">
+                        <span class="text-gray-600">Welcome, <span id="userName" class="font-medium text-gray-900"></span></span>
+                        <button onclick="logout()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Logout">
+                            <i class="fas fa-sign-out-alt text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out mt-16 lg:relative lg:inset-y-auto lg:mt-0 lg:translate-x-0 -translate-x-full">
+                <nav class="p-4 space-y-2">
+                    <button data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors bg-gray-100 text-gray-900">
+                        <i class="fas fa-home w-5 h-5"></i>
+                        Dashboard
+                    </button>
+                    <button data-view="upload" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-upload w-5 h-5"></i>
+                        Add Paper
+                    </button>
+                    <button data-view="categories" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-folder-tree w-5 h-5"></i>
+                        Categories
+                    </button>
+                    <button data-view="analytics" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-chart-bar w-5 h-5"></i>
+                        Analytics
+                    </button>
+                    <button data-view="search" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-search w-5 h-5"></i>
+                        Search
+                    </button>
+                    <button data-view="drive-docs" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-cloud w-5 h-5"></i>
+                        Drive Documents
+                    </button>
+                    <button data-view="drive-sync" class="nav-btn w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors hover:bg-gray-100 text-gray-600">
+                        <i class="fas fa-sync w-5 h-5"></i>
+                        Drive Sync
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 lg:ml-0">
+                <div class="p-6">
+                    <!-- Dashboard View -->
+                    <div id="dashboardView" class="view-content">
+                        <!-- Dashboard Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-2xl font-medium text-gray-900">Reading Dashboard</h2>
+                                <p class="text-gray-500">Your academic paper collection and reading insights</p>
+                            </div>
+                            <button id="addNewPaperBtn" class="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                                <i class="fas fa-file-text"></i>
+                                Add New Paper
+                            </button>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Papers in Library</p>
+                                        <p class="text-2xl font-medium text-gray-900" id="totalPapers">1,227</p>
+                                        <p class="text-sm text-green-600" id="weeklyIncrease">+57 this week</p>
+                                    </div>
+                                    <i class="fas fa-book-open text-2xl text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Categories</p>
+                                        <p class="text-2xl font-medium text-gray-900" id="totalCategories">145</p>
+                                        <p class="text-sm text-blue-600">8 main categories</p>
+                                    </div>
+                                    <i class="fas fa-folder-tree text-2xl text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Reading Progress</p>
+                                        <p class="text-2xl font-medium text-gray-900" id="readingProgress">94%</p>
+                                        <p class="text-sm text-green-600">This month</p>
+                                    </div>
+                                    <i class="fas fa-brain text-2xl text-gray-400"></i>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Tags Generated</p>
+                                        <p class="text-2xl font-medium text-gray-900" id="totalTags">2,341</p>
+                                        <p class="text-sm text-purple-600">Auto-generated</p>
+                                    </div>
+                                    <i class="fas fa-tag text-2xl text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Category Distribution -->
+                            <div class="lg:col-span-2 bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-medium text-gray-900">Category Distribution</h3>
+                                    <i class="fas fa-trending-up text-gray-400"></i>
+                                </div>
+                                <div id="categoryDistribution" class="space-y-4">
+                                    <!-- Category bars will be populated here -->
+                                </div>
+                            </div>
+
+                            <!-- AI Status -->
+                            <div class="bg-white p-6 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-medium text-gray-900">AI Status</h3>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-500">Processing Queue</span>
+                                        <span class="text-sm text-gray-900">3 pending</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-500">Success Rate</span>
+                                        <span class="text-sm text-green-600">94%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-500">Read Today</span>
+                                        <span class="text-sm text-gray-900">12 papers</span>
+                                    </div>
+                                    <div class="pt-2 border-t border-gray-200">
+                                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                                            <i class="fas fa-bullseye text-green-500"></i>
+                                            <span>Model v2.1 Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload View (Hidden by default) -->
+                    <div id="uploadView" class="view-content hidden">
+                        <!-- Add URL Form -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+                            <h2 class="text-xl font-semibold mb-4 text-gray-800">Add New Reference</h2>
+                            <p class="text-sm text-gray-600 mb-4">
+                                Supported sources: Google Scholar, ResearchGate, arXiv, IEEE Xplore, direct PDF links, or any webpage with academic content.
+                            </p>
+                            <form id="urlForm">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <input 
+                                        type="url" 
+                                        id="urlInput" 
+                                        placeholder="https://scholar.google.com/... or https://arxiv.org/... or direct PDF URL" 
+                                        class="col-span-2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    >
+                                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                                        <i class="fas fa-plus mr-2"></i>Extract & Save
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <i class="fas fa-magic mr-1"></i>Document type will be automatically detected
+                                </p>
+                                <div class="mt-4 text-sm text-gray-600">
+                                    <p class="mb-2"><strong>Example URLs to try:</strong></p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        <button type="button" onclick="document.getElementById('urlInput').value='https://arxiv.org/abs/2301.07041'" 
+                                                class="text-left p-2 bg-gray-100 rounded hover:bg-gray-200 text-xs">
+                                            📄 arXiv Paper Example
+                                        </button>
+                                        <button type="button" onclick="document.getElementById('urlInput').value='https://www.nature.com/articles/s41586-023-06221-2'" 
+                                                class="text-left p-2 bg-gray-100 rounded hover:bg-gray-200 text-xs">
+                                            📄 Nature Article Example
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Upload PDF Section -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800">Upload PDF Document</h2>
+                                <button id="uploadBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-upload mr-2"></i>Upload PDF
+                                </button>
+                            </div>
+                            <div id="dropArea" class="upload-area p-8 rounded-lg text-center cursor-pointer border-2 border-dashed border-gray-300">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Drag and drop PDF file here or click to browse</p>
+                                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                                <p class="text-sm text-gray-500">Maximum file size: 50MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Views -->
+                    <div id="searchView" class="view-content hidden">
+                        <!-- Filters and Search -->
+                        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+                            <div class="flex flex-wrap gap-4 items-center">
+                                <div class="flex-1 min-w-64">
+                                    <input 
+                                        type="text" 
+                                        id="searchInput" 
+                                        placeholder="Search references..." 
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    >
+                                </div>
+                                <select id="filterType" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Types</option>
+                                    <option value="jurnal">Jurnal</option>
+                                    <option value="tesis">Tesis</option>
+                                    <option value="buku">Buku</option>
+                                    <option value="laporan">Laporan</option>
+                                </select>
+                                <select id="filterDiscipline" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Disciplines</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Biology">Biology</option>
+                                    <option value="Medicine">Medicine</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Psychology">Psychology</option>
+                                    <option value="Education">Education</option>
+                                </select>
+                                <select id="sortBy" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="createdAt">Date Added</option>
+                                    <option value="title">Title</option>
+                                    <option value="publicationYear">Publication Year</option>
+                                    <option value="rating">Rating</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Loading Indicator -->
+                        <div id="loadingIndicator" class="hidden text-center py-8">
+                            <div class="loading-spinner mx-auto mb-4"></div>
+                            <p id="loadingText" class="text-gray-600">Loading...</p>
+                        </div>
+
+                        <!-- References Grid -->
+                        <div id="referencesContainer">
+                            <div id="referencesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- References will be loaded here -->
+                            </div>
+                            
+                            <!-- Pagination -->
+                            <div id="pagination" class="mt-8 flex justify-center">
+                                <!-- Pagination will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other view placeholders -->
+                    <div id="categoriesView" class="view-content hidden">
+                        <h2 class="text-2xl font-medium mb-4">Categories Management</h2>
+                        <div id="folderSection" class="bg-white rounded-lg border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold text-gray-800">
+                                    <i class="fas fa-folder-open text-blue-600 mr-2"></i>Folder Management
+                                </h3>
+                                <div class="flex space-x-2">
+                                    <button onclick="showFolderModal()" 
+                                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                        <i class="fas fa-plus mr-2"></i>Create Folder
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="folderList" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <!-- Folders will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="analyticsView" class="view-content hidden">
+                        <h2 class="text-2xl font-medium mb-4">Analytics</h2>
+                        <div id="statsContent" class="bg-white rounded-lg border border-gray-200 p-6">
+                            <!-- Analytics content will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="drive-docsView" class="view-content hidden">
+                        <h2 class="text-2xl font-medium mb-4">Drive Documents</h2>
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <p class="text-gray-500">Drive documents integration coming soon...</p>
+                        </div>
+                    </div>
+
+                    <div id="drive-syncView" class="view-content hidden">
+                        <h2 class="text-2xl font-medium mb-4">Drive Sync</h2>
+                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                            <button onclick="toggleGoogleDriveSync()" 
+                                    id="googleDriveBtn"
+                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fab fa-google-drive mr-2"></i>Connect Google Drive
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Sidebar Overlay for mobile -->
+        <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black bg-opacity-20 lg:hidden hidden"></div>
+
+        <!-- Reader Modal -->
+        <div id="readerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <!-- Added responsive container + animation classes -->
+            <div class="bg-white reader-modal-container m-2 md:mx-auto md:my-6 rounded-xl w-auto md:max-w-6xl h-full md:h-[90%] overflow-hidden flex flex-col shadow-2xl modal-content">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                    <div class="flex-1">
+                        <h2 id="modalTitle" class="text-2xl font-bold text-gray-800"></h2>
+                        <p id="modalAuthors" class="text-gray-600 mt-1"></p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="bookmarkBtn" class="text-gray-500 hover:text-yellow-500 transition-colors">
+                            <i class="fas fa-bookmark text-xl"></i>
+                        </button>
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-600 mr-2">Rate:</span>
+                            <div id="ratingStars" class="flex">
+                                <!-- Stars will be added here -->
+                            </div>
+                        </div>
+                        <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Tab buttons inserted dynamically if needed -->
+                <div id="modalContent" class="flex-1 overflow-auto p-6 bg-white">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="bg-white m-8 rounded-lg max-w-2xl mx-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-800">Upload PDF Document</h2>
+                </div>
+                <div class="p-6">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <div id="dropArea" class="upload-area p-8 rounded-lg text-center cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Drag and drop PDF file here or click to browse</p>
+                                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                                <p class="text-sm text-gray-500">Maximum file size: 50MB</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="pdfTitle" class="block text-sm font-medium text-gray-700 mb-1">Title (optional)</label>
+                                <input type="text" id="pdfTitle" class="w-full p-3 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label for="pdfType" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                <select id="pdfType" class="w-full p-3 border border-gray-300 rounded-lg">
+                                    <option value="jurnal">Jurnal</option>
+                                    <option value="tesis">Tesis</option>
+                                    <option value="buku">Buku</option>
+                                    <option value="laporan">Laporan</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="pdfAuthors" class="block text-sm font-medium text-gray-700 mb-1">Authors (optional)</label>
+                            <input type="text" id="pdfAuthors" placeholder="Separate multiple authors with commas" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" id="cancelUpload" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Upload & Process
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Modal -->
+        <div id="statsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="bg-white m-8 rounded-lg max-w-4xl mx-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-800">Statistics & Overview</h2>
+                </div>
+                <div id="statsContent" class="p-6">
+                    <!-- Stats will be loaded here -->
+                </div>
+                <div class="p-6 border-t border-gray-200 text-right">
+                    <button id="closeStats" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Container -->
+        <div id="notificationContainer"></div>
+        
+        <!-- Include Modals -->
+        <div id="modalContainer">
+            <!-- Login/Register Modal -->
+            <div id="loginModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900" id="authModalTitle">Login</h3>
+                        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username atau Email</label>
+                            <input type="text" id="loginUsername" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Masukkan username atau email">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="loginPassword" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Masukkan password">
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                    </form>
+
+                    <!-- Register Form -->
+                    <form id="registerForm" class="space-y-4 hidden">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Depan</label>
+                                <input type="text" id="registerFirstName"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       placeholder="Nama depan">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Belakang</label>
+                                <input type="text" id="registerLastName"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       placeholder="Nama belakang">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="registerUsername" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Pilih username">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="registerEmail" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="alamat@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="registerPassword" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Minimal 6 karakter">
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <i class="fas fa-user-plus mr-2"></i>Daftar
+                        </button>
+                    </form>
+
+                    <!-- Toggle Links -->
+                    <div class="mt-4 text-center">
+                        <p id="toggleToRegister" class="text-sm text-gray-600">
+                            Belum punya akun? 
+                            <a href="#" onclick="toggleAuthForm()" class="text-blue-600 hover:underline">Daftar di sini</a>
+                        </p>
+                        <p id="toggleToLogin" class="text-sm text-gray-600 hidden">
+                            Sudah punya akun? 
+                            <a href="#" onclick="toggleAuthForm()" class="text-blue-600 hover:underline">Login di sini</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Folder Management Modal -->
+            <div id="folderModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900" id="folderModalTitle">Buat Folder Baru</h3>
+                        <button onclick="closeFolderModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="folderForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Folder</label>
+                            <input type="text" id="folderName" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Contoh: Penelitian AI, Jurnal Kimia">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi (Opsional)</label>
+                            <textarea id="folderDescription"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                      rows="2" placeholder="Deskripsi folder..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ikon</label>
+                                <select id="folderIcon" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="fa-folder">📁 Folder</option>
+                                    <option value="fa-book">📚 Buku</option>
+                                    <option value="fa-graduation-cap">🎓 Akademik</option>
+                                    <option value="fa-flask">🧪 Penelitian</option>
+                                    <option value="fa-star">⭐ Favorit</option>
+                                    <option value="fa-bookmark">🔖 Bookmark</option>
+                                    <option value="fa-users">👥 Konferensi</option>
+                                    <option value="fa-newspaper">📰 Artikel</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Warna</label>
+                                <select id="folderColor" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="#3B82F6">🔵 Biru</option>
+                                    <option value="#10B981">🟢 Hijau</option>
+                                    <option value="#F59E0B">🟡 Kuning</option>
+                                    <option value="#EF4444">🔴 Merah</option>
+                                    <option value="#8B5CF6">🟣 Ungu</option>
+                                    <option value="#F97316">🟠 Oranye</option>
+                                    <option value="#6B7280">⚫ Abu-abu</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" 
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-plus mr-2"></i>Buat Folder
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/folders.js"></script>
+</body>
+</html>

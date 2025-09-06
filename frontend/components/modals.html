@@ -1,0 +1,143 @@
+<!-- Login Modal -->
+<div id="loginModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900" id="authModalTitle">Login</h3>
+            <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Username atau Email</label>
+                <input type="text" id="loginUsername" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Masukkan username atau email">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="loginPassword" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Masukkan password">
+            </div>
+            <button type="submit" 
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+            </button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="space-y-4 hidden">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Depan</label>
+                    <input type="text" id="registerFirstName"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Nama depan">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Belakang</label>
+                    <input type="text" id="registerLastName"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Nama belakang">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="registerUsername" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Pilih username">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="registerEmail" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="alamat@email.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="registerPassword" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Minimal 6 karakter">
+            </div>
+            <button type="submit" 
+                    class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <i class="fas fa-user-plus mr-2"></i>Daftar
+            </button>
+        </form>
+
+        <!-- Toggle Links -->
+        <div class="mt-4 text-center">
+            <p id="toggleToRegister" class="text-sm text-gray-600">
+                Belum punya akun? 
+                <a href="#" onclick="toggleAuthForm()" class="text-blue-600 hover:underline">Daftar di sini</a>
+            </p>
+            <p id="toggleToLogin" class="text-sm text-gray-600 hidden">
+                Sudah punya akun? 
+                <a href="#" onclick="toggleAuthForm()" class="text-blue-600 hover:underline">Login di sini</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Folder Management Modal -->
+<div id="folderModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900" id="folderModalTitle">Buat Folder Baru</h3>
+            <button onclick="closeFolderModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="folderForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Folder</label>
+                <input type="text" id="folderName" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Contoh: Penelitian AI, Jurnal Kimia">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi (Opsional)</label>
+                <textarea id="folderDescription"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows="2" placeholder="Deskripsi folder..."></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ikon</label>
+                    <select id="folderIcon" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="fa-folder">📁 Folder</option>
+                        <option value="fa-book">📚 Buku</option>
+                        <option value="fa-graduation-cap">🎓 Akademik</option>
+                        <option value="fa-flask">🧪 Penelitian</option>
+                        <option value="fa-star">⭐ Favorit</option>
+                        <option value="fa-bookmark">🔖 Bookmark</option>
+                        <option value="fa-users">👥 Konferensi</option>
+                        <option value="fa-newspaper">📰 Artikel</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Warna</label>
+                    <select id="folderColor" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="#3B82F6">🔵 Biru</option>
+                        <option value="#10B981">🟢 Hijau</option>
+                        <option value="#F59E0B">🟡 Kuning</option>
+                        <option value="#EF4444">🔴 Merah</option>
+                        <option value="#8B5CF6">🟣 Ungu</option>
+                        <option value="#F97316">🟠 Oranye</option>
+                        <option value="#6B7280">⚫ Abu-abu</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" 
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-plus mr-2"></i>Buat Folder
+            </button>
+        </form>
+    </div>
+</div>
