@@ -1,5 +1,93 @@
 # Academic Reference Reader
 
+A modern web application for managing and reading academic papers with AI-powered categorization and organization features.
+
+## Features
+
+- 📚 **Smart Paper Management**: Upload PDFs or extract from URLs (Google Scholar, arXiv, ResearchGate, etc.)
+- 🤖 **AI Categorization**: Automatic document classification and keyword extraction
+- 📖 **PDF Web Viewer**: Read papers directly in the browser with embedded PDF viewer
+- 🗂️ **Folder Organization**: Create custom folders to organize your research
+- 🔍 **Advanced Search**: Search across titles, abstracts, and full text
+- 📊 **Analytics Dashboard**: Track your reading progress and library statistics
+- ☁️ **Google Drive Sync**: Sync your papers with Google Drive
+- 👥 **User Management**: Personal accounts and authentication
+
+## Technology Stack
+
+### Backend
+- Node.js with Express
+- MongoDB for data storage
+- PDF parsing and text extraction
+- Google Drive API integration
+
+### Frontend
+- Modern responsive design with Tailwind CSS
+- JavaScript ES6+ with modular architecture
+- Interactive UI components and modals
+- Real-time statistics and progress tracking
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Maftuuh1922/Academic-Reference-Reader.git
+cd Academic-Reference-Reader
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Start the application:
+```bash
+# Start backend
+cd backend
+node server.js
+
+# Frontend runs on http://localhost:3000
+```
+
+## Usage
+
+1. **Add Papers**: Upload PDF files or paste URLs from academic sources
+2. **Organize**: Create folders and categorize your papers
+3. **Read**: Use the built-in PDF viewer with tabs for details and full document view
+4. **Search**: Find papers by title, author, keywords, or content
+5. **Track Progress**: Monitor your reading statistics and library growth
+
+## API Endpoints
+
+- `POST /api/references/add-from-url` - Extract paper from URL
+- `POST /api/upload/upload-pdf` - Upload PDF file
+- `GET /api/references` - Get all references with filters
+- `GET /api/references/:id` - Get single reference
+- `GET /api/upload/view/:id` - View PDF in browser
+- `GET /api/upload/download/:id` - Download PDF file
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Author
+
+**Maftuuh1922** - [GitHub](https://github.com/Maftuuh1922)
+
 A powerful web application for extracting, managing, and reading academic references from various sources including Google Scholar, ResearchGate, IEEE, arXiv, and direct PDF files.
 
 ![Academic Reader Demo](https://img.shields.io/badge/Status-Ready-green.svg)
@@ -258,5 +346,6 @@ If you encounter any issues or have questions, please:
 ---
 
 **Happy researching! 📚🎓**
-#   A c a d e m i c - R e f e r e n c e - R e a d e r  
+#   A c a d e m i c - R e f e r e n c e - R e a d e r 
+ 
  
